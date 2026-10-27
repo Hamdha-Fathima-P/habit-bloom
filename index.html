@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HabitBloom - Flourish Every Day</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts & Lucide Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        theme: {
+                            lavender: '#E6E6FA',
+                            lavenderDeep: '#7C3AED',
+                            mint: '#E8F5E9',
+                            mintDark: '#2E7D32',
+                            rose: '#FCE4EC',
+                            roseDark: '#C2185B',
+                            softBg: '#F8F9FE',
+                            cardBg: '#FFFFFF',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #F5F3FF 0%, #F0FDF4 50%, #FDF2F8 100%);
+            min-height: 100vh;
+        }
+
+        /* Glassmorphism & Soft Aesthetics */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 10px 30px -5px rgba(124, 58, 237, 0.05);
+        }
+
+        .theme-lavender {
+            --primary: #8B5CF6;
+            --primary-light: #DDD6FE;
+            --primary-bg: #F5F3FF;
+            --accent: #C4B5FD;
+        }
+        .theme-mint {
+            --primary: #10B981;
+            --primary-light: #A7F3D0;
+            --primary-bg: #ECFDF5;
+            --accent: #6EE7B7;
+        }
+        .theme-rose {
+            --primary: #EC4899;
+            --primary-light: #FBCFE8;
+            --primary-bg: #FDF2F8;
+            --accent: #F472B6;
+        }
+
+        /* Confetti / Particle Animation */
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.18); }
+            100% { transform: scale(1); }
+        }
+        .animate-pop {
+            animation: pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Progress Bar Smooth Transition */
+        .progress-bar-fill {
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(167, 139, 250, 0.3);
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(167, 139, 250, 0.6);
+        }
+    </style>
+</head>
+<body class="theme-lavender text-slate-700 antialiased selection:bg-purple-200">
+
+    <!-- App Container -->
+    <div class="flex h-screen overflow-hidden max-w-[1600px] mx-auto">
+
+        <!-- Sidebar Navigation (Desktop) -->
+        <aside class="hidden md:flex flex-col w-64 bg-white/70 backdrop-blur-md border-r border-purple-100/60 p-6 justify-between">
+            <div class="space-y-8">
+                <!-- Brand Logo -->
+                <div class="flex items-center space-x-3 px-2">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-500 to-pink-400 flex items-center justify-center text-white shadow-md shadow-purple-200">
+                        <i data-lucide="flower-2" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-extrabold text-xl bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">HabitBloom</h1>
+                        <p class="text-xs text-slate-400 font-medium">Daily Growth Tracker</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="space-y-1.5" id="sidebar-nav">
+                    <button onclick="switchTab('dashboard')" data-tab="dashboard" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 bg-purple-100/70 text-purple-700 shadow-sm">
+                        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                        <span>Dashboard</span>
+                    </button>
+                    <button onclick="switchTab('habits')" data-tab="habits" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-sm font-medium text-slate-500 hover:text-purple-600 hover:bg-purple-50/50 transition-all duration-200">
+                        <i data-lucide="check-square" class="w-5 h-5"></i>
+                        <span>My Habits</span>
+                    </button>
+                    <button onclick="switchTab('progress')" data-tab="progress" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-sm font-medium text-slate-500 hover:text-purple-600 hover:bg-purple-50/50 transition-all duration-200">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                        <span>Weekly Progress</span>
+                    </button>
+                    <button onclick="switchTab('settings')" data-tab="settings" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-sm font-medium text-slate-500 hover:text-purple-600 hover:bg-purple-50/50 transition-all duration-200">
+                        <i data-lucide="settings" class="w-5 h-5"></i>
+                        <span>Settings</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Profile Widget -->
+            <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-2xl border border-purple-100 flex items-center space-x-3">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Alex Profile" class="w-10 h-10 rounded-full object-cover ring-2 ring-purple-300">
+                <div class="overflow-hidden">
+                    <h4 class="text-sm font-bold text-slate-800 truncate">Alex Morgan</h4>
+                    <p class="text-xs text-purple-600 font-medium truncate">Bloom Level 4 🌸</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col h-full overflow-y-auto relative pb-20 md:pb-6">
+            
+            <!-- Header Top Bar -->
+            <header class="p-4 md:p-8 pb-4 flex items-center justify-between">
+                <div>
+                    <h2 id="page-title" class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight">Dashboard</h2>
+                    <p id="live-date" class="text-xs md:text-sm text-slate-400 font-medium mt-1">Fetching date...</p>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <button onclick="openModal()" class="flex items-center space-x-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold text-sm px-4 py-2.5 rounded-2xl shadow-lg shadow-purple-200 hover:shadow-purple-300 transition-all active:scale-95">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">Add Habit</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- TAB CONTENT CONTAINER -->
+            <div class="px-4 md:px-8 space-y-6 flex-1">
+
+                <!-- TAB 1: DASHBOARD -->
+                <div id="tab-dashboard" class="tab-content space-y-6">
+                    
+                    <!-- Welcome Hero Banner -->
+                    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-400 via-pink-400 to-rose-300 p-6 md:p-8 text-white shadow-xl shadow-purple-200/50">
+                        <div class="relative z-10 max-w-xl space-y-2">
+                            <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-md text-xs font-semibold rounded-full uppercase tracking-wider">Daily Inspiration</span>
+                            <h3 id="welcome-greeting" class="text-2xl md:text-3xl font-extrabold">Good morning, Alex! ✨</h3>
+                            <p id="quote-text" class="text-purple-50 text-sm md:text-base italic leading-relaxed">"Small daily improvements over time lead to stunning results."</p>
+                        </div>
+                        <!-- Decorative SVG Background Blobs -->
+                        <div class="absolute -right-8 -bottom-8 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                        <div class="absolute right-32 -top-12 w-36 h-36 bg-pink-300/30 rounded-full blur-xl pointer-events-none"></div>
+                    </div>
+
+                    <!-- Metrics Stats Grid -->
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div class="glass-card p-5 rounded-3xl flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Habits</span>
+                                <div class="w-8 h-8 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center">
+                                    <i data-lucide="layers" class="w-4 h-4"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 id="stat-total" class="text-3xl font-extrabold text-slate-800">0</h3>
+                                <p class="text-xs text-slate-400 font-medium mt-0.5">Active daily routines</p>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-5 rounded-3xl flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Completed Today</span>
+                                <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 id="stat-completed" class="text-3xl font-extrabold text-slate-800">0</h3>
+                                <p id="stat-completed-desc" class="text-xs text-emerald-600 font-medium mt-0.5">0% achieved</p>
+                            </div>
+                        </div>
+
+                        <div class="col-span-2 md:col-span-1 glass-card p-5 rounded-3xl flex flex-col justify-between">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Best Streak</span>
+                                <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
+                                    <i data-lucide="flame" class="w-4 h-4"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 id="stat-streak" class="text-3xl font-extrabold text-slate-800">0 Days</h3>
+                                <p class="text-xs text-amber-600 font-medium mt-0.5">Keep the momentum!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daily Progress Bar Card -->
+                    <div class="glass-card p-6 rounded-3xl space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-base">Daily Bloom Progress</h4>
+                                <p class="text-xs text-slate-400 font-medium">Complete your routines to reach 100%</p>
+                            </div>
+                            <span id="progress-percent-text" class="text-lg font-black text-purple-600">0%</span>
+                        </div>
+                        <div class="w-full h-4 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-100">
+                            <div id="daily-progress-fill" class="progress-bar-fill h-full bg-gradient-to-r from-purple-500 via-pink-400 to-emerald-400 rounded-full w-0"></div>
+                        </div>
+                    </div>
+
+                    <!-- Today's Fast Checklist -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-slate-800 text-lg">Today's Habits</h4>
+                            <button onclick="switchTab('habits')" class="text-xs font-bold text-purple-600 hover:underline">View All</button>
+                        </div>
+                        <div id="dashboard-habits-list" class="space-y-3">
+                            <!-- Injected dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: MY HABITS -->
+                <div id="tab-habits" class="tab-content space-y-6 hidden">
+                    
+                    <!-- Category Pills Filter Bar -->
+                    <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" id="category-filter-bar">
+                        <!-- Dynamic Filters -->
+                    </div>
+
+                    <!-- Full Habit Cards Grid -->
+                    <div id="full-habits-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Injected dynamically -->
+                    </div>
+                </div>
+
+                <!-- TAB 3: WEEKLY PROGRESS -->
+                <div id="tab-progress" class="tab-content space-y-6 hidden">
+                    <div class="glass-card p-6 rounded-3xl space-y-6">
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-lg">7-Day Completion History</h4>
+                            <p class="text-xs text-slate-400 font-medium">Visual log of habit compliance over the past week</p>
+                        </div>
+                        
+                        <!-- Weekly Grid Tracker Table -->
+                        <div class="overflow-x-auto">
+                            <div id="weekly-tracker-grid" class="min-w-[600px] space-y-3">
+                                <!-- Dynamic Weekly Matrix -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: SETTINGS -->
+                <div id="tab-settings" class="tab-content space-y-6 hidden">
+                    <div class="glass-card p-6 rounded-3xl space-y-6 max-w-2xl">
+                        <h4 class="font-bold text-slate-800 text-lg border-b pb-3 border-slate-100">Preferences & Data</h4>
+
+                        <!-- Theme Chooser -->
+                        <div class="space-y-3">
+                            <label class="text-sm font-bold text-slate-700">App Color Palette</label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <button onclick="setTheme('theme-lavender')" class="p-4 rounded-2xl border border-purple-200 bg-purple-50/50 flex flex-col items-center justify-center gap-2 hover:border-purple-400 transition-all">
+                                    <div class="w-6 h-6 rounded-full bg-purple-500"></div>
+                                    <span class="text-xs font-bold text-slate-700">Lavender</span>
+                                </button>
+                                <button onclick="setTheme('theme-mint')" class="p-4 rounded-2xl border border-emerald-200 bg-emerald-50/50 flex flex-col items-center justify-center gap-2 hover:border-emerald-400 transition-all">
+                                    <div class="w-6 h-6 rounded-full bg-emerald-500"></div>
+                                    <span class="text-xs font-bold text-slate-700">Mint Soft</span>
+                                </button>
+                                <button onclick="setTheme('theme-rose')" class="p-4 rounded-2xl border border-pink-200 bg-pink-50/50 flex flex-col items-center justify-center gap-2 hover:border-pink-400 transition-all">
+                                    <div class="w-6 h-6 rounded-full bg-pink-500"></div>
+                                    <span class="text-xs font-bold text-slate-700">Rose Blossom</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Data Reset Actions -->
+                        <div class="pt-4 border-t border-slate-100 space-y-3">
+                            <label class="text-sm font-bold text-slate-700">Data Management</label>
+                            <div class="flex flex-wrap gap-3">
+                                <button onclick="resetToDefaults()" class="px-4 py-2.5 rounded-2xl bg-amber-50 text-amber-700 font-semibold text-xs border border-amber-200 hover:bg-amber-100 transition-all">
+                                    Reset Dummy Data
+                                </button>
+                                <button onclick="clearAllData()" class="px-4 py-2.5 rounded-2xl bg-rose-50 text-rose-700 font-semibold text-xs border border-rose-200 hover:bg-rose-100 transition-all">
+                                    Wipe All Custom Habits
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Bottom Navigation (Mobile) -->
+        <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-purple-100 flex justify-around p-3 z-30 shadow-lg">
+            <button onclick="switchTab('dashboard')" data-tab-mobile="dashboard" class="flex flex-col items-center text-purple-600">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                <span class="text-[10px] font-bold mt-1">Dashboard</span>
+            </button>
+            <button onclick="switchTab('habits')" data-tab-mobile="habits" class="flex flex-col items-center text-slate-400">
+                <i data-lucide="check-square" class="w-5 h-5"></i>
+                <span class="text-[10px] font-bold mt-1">Habits</span>
+            </button>
+            <button onclick="switchTab('progress')" data-tab-mobile="progress" class="flex flex-col items-center text-slate-400">
+                <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                <span class="text-[10px] font-bold mt-1">Progress</span>
+            </button>
+            <button onclick="switchTab('settings')" data-tab-mobile="settings" class="flex flex-col items-center text-slate-400">
+                <i data-lucide="settings" class="w-5 h-5"></i>
+                <span class="text-[10px] font-bold mt-1">Settings</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- MODAL: ADD HABIT -->
+    <div id="habit-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden opacity-0 transition-opacity duration-200">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl border border-purple-100 space-y-5 transform scale-95 transition-transform duration-200" id="modal-card">
+            <div class="flex items-center justify-between border-b pb-3 border-slate-100">
+                <h3 class="text-xl font-extrabold text-slate-800">Add New Habit</h3>
+                <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <form id="add-habit-form" onsubmit="handleAddHabit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Habit Name</label>
+                    <input type="text" id="habit-name" required placeholder="e.g. Read 15 Minutes" class="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400 font-medium text-sm text-slate-800">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Category</label>
+                        <select id="habit-category" class="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400 font-medium text-sm text-slate-800">
+                            <option value="Health">Health</option>
+                            <option value="Fitness">Fitness</option>
+                            <option value="Learning">Learning</option>
+                            <option value="Mindfulness">Mindfulness</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Icon</label>
+                        <select id="habit-icon" class="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400 font-medium text-sm text-slate-800">
+                            <option value="droplet">💧 Water</option>
+                            <option value="book-open">📖 Book</option>
+                            <option value="dumbbell">🏋️ Fitness</option>
+                            <option value="heart">🧘 Heart/Mind</option>
+                            <option value="moon">🌙 Sleep</option>
+                            <option value="coffee">☕ Routine</option>
+                            <option value="smile">😊 Mood</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 rounded-2xl bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-all">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all">Create Habit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- JAVASCRIPT APPLICATION LOGIC -->
+    <script>
+        // Initial Dummy Data
+        const defaultHabits = [
+            { id: '1', name: 'Drink 2L Water', category: 'Health', icon: 'droplet', completed: true, streak: 5, history: [true, true, false, true, true, true, true] },
+            { id: '2', name: 'Read 10 Pages', category: 'Learning', icon: 'book-open', completed: false, streak: 3, history: [true, false, true, true, false, true, false] },
+            { id: '3', name: 'Morning Exercise', category: 'Fitness', icon: 'dumbbell', completed: true, streak: 8, history: [true, true, true, true, true, true, true] },
+            { id: '4', name: 'Meditate for 10 Minutes', category: 'Mindfulness', icon: 'heart', completed: false, streak: 2, history: [false, true, true, false, true, false, false] },
+            { id: '5', name: 'Sleep Before 11 PM', category: 'Health', icon: 'moon', completed: false, streak: 4, history: [true, true, true, false, true, true, false] }
+        ];
+
+        const motivationalQuotes = [
+            { quote: "Small daily improvements over time lead to stunning results.", minPct: 0 },
+            { quote: "Great progress! Every checked box brings you closer to your goal.", minPct: 40 },
+            { quote: "You are on fire today! Almost all habits bloomed beautifully.", minPct: 75 },
+            { quote: "Mastery achieved! You finished 100% of your daily habits today! 🎉", minPct: 100 }
+        ];
+
+        // State Management
+        let habits = [];
+        let activeCategory = 'All';
+
+        // Initialize App
+        window.onload = function() {
+            loadState();
+            setupDate();
+            renderAll();
+            lucide.createIcons();
+        };
+
+        // Load & Save State to LocalStorage
+        function loadState() {
+            const saved = localStorage.getItem('habitbloom_habits');
+            if (saved) {
+                try {
+                    habits = JSON.parse(saved);
+                } catch(e) {
+                    habits = defaultHabits;
+                }
+            } else {
+                habits = defaultHabits;
+            }
+        }
+
+        function saveState() {
+            localStorage.setItem('habitbloom_habits', JSON.stringify(habits));
+        }
+
+        // Setup Header Live Date
+        function setupDate() {
+            const options = { weekday: 'long', month: 'short', day: 'numeric' };
+            const today = new Date().toLocaleDateString('en-US', options);
+            document.getElementById('live-date').innerText = today;
+        }
+
+        // Render Everything
+        function renderAll() {
+            renderDashboard();
+            renderHabitCards();
+            renderCategoryFilters();
+            renderWeeklyTracker();
+            lucide.createIcons();
+        }
+
+        // Dashboard Metrics & List
+        function renderDashboard() {
+            const total = habits.length;
+            const completed = habits.filter(h => h.completed).length;
+            const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+            // Maximum streak
+            const maxStreak = habits.length > 0 ? Math.max(...habits.map(h => h.streak)) : 0;
+
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-completed').innerText = completed;
+            document.getElementById('stat-completed-desc').innerText = `${pct}% target reached`;
+            document.getElementById('stat-streak').innerText = `${maxStreak} Days`;
+
+            // Progress Bar Fill
+            document.getElementById('daily-progress-fill').style.width = `${pct}%`;
+            document.getElementById('progress-percent-text').innerText = `${pct}%`;
+
+            // Dynamic Motivational Quote
+            let currentQuote = motivationalQuotes[0].quote;
+            for (let q of motivationalQuotes) {
+                if (pct >= q.minPct) currentQuote = q.quote;
+            }
+            document.getElementById('quote-text').innerText = `"${currentQuote}"`;
+
+            // Dashboard Fast Habits List
+            const dashList = document.getElementById('dashboard-habits-list');
+            dashList.innerHTML = habits.map(h => `
+                <div class="glass-card p-4 rounded-2xl flex items-center justify-between transition-all hover:translate-x-1 ${h.completed ? 'opacity-75 bg-purple-50/40' : ''}">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl ${h.completed ? 'bg-emerald-100 text-emerald-600' : 'bg-purple-100 text-purple-600'} flex items-center justify-center">
+                            <i data-lucide="${h.icon}" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-sm text-slate-800 ${h.completed ? 'line-through text-slate-400' : ''}">${escapeHtml(h.name)}</h5>
+                            <span class="text-[10px] font-semibold text-purple-500 uppercase tracking-wider">${h.category}</span>
+                        </div>
+                    </div>
+                    <button onclick="toggleHabit('${h.id}')" class="w-8 h-8 rounded-xl flex items-center justify-center border transition-all ${h.completed ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 hover:border-purple-400 text-transparent'}">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Full Habit Page & Filtered Cards
+        function renderHabitCards() {
+            const grid = document.getElementById('full-habits-grid');
+            const filtered = activeCategory === 'All' ? habits : habits.filter(h => h.category === activeCategory);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-2 text-center py-12 text-slate-400 font-medium">
+                        No habits found in this category.
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(h => `
+                <div class="glass-card p-5 rounded-3xl space-y-4 flex flex-col justify-between transition-all hover:shadow-lg ${h.completed ? 'border-emerald-200 bg-emerald-50/20' : ''}">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 rounded-2xl ${h.completed ? 'bg-emerald-100 text-emerald-600' : 'bg-purple-100 text-purple-600'} flex items-center justify-center shadow-sm">
+                                <i data-lucide="${h.icon}" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700 uppercase tracking-wider">${h.category}</span>
+                                <h4 class="font-bold text-base text-slate-800 mt-1 ${h.completed ? 'line-through text-slate-400' : ''}">${escapeHtml(h.name)}</h4>
+                            </div>
+                        </div>
+                        <button onclick="deleteHabit('${h.id}')" class="text-slate-300 hover:text-rose-500 p-1 rounded-lg transition-colors">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-100/60">
+                        <div class="flex items-center space-x-1.5 text-xs font-semibold text-amber-500">
+                            <i data-lucide="flame" class="w-4 h-4 fill-amber-400"></i>
+                            <span>${h.streak} Day Streak</span>
+                        </div>
+                        <button onclick="toggleHabit('${h.id}')" class="px-4 py-2 rounded-2xl text-xs font-bold flex items-center space-x-2 transition-all active:scale-95 ${h.completed ? 'bg-emerald-500 text-white shadow-md shadow-emerald-200' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'}">
+                            <i data-lucide="${h.completed ? 'check-circle-2' : 'circle'}" class="w-4 h-4"></i>
+                            <span>${h.completed ? 'Completed' : 'Mark Done'}</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Category Filter Pills
+        function renderCategoryFilters() {
+            const categories = ['All', 'Health', 'Learning', 'Fitness', 'Mindfulness'];
+            const container = document.getElementById('category-filter-bar');
+
+            container.innerHTML = categories.map(cat => {
+                const count = cat === 'All' ? habits.length : habits.filter(h => h.category === cat).length;
+                const isActive = activeCategory === cat;
+                return `
+                    <button onclick="setCategory('${cat}')" class="px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all flex items-center space-x-2 ${isActive ? 'bg-purple-600 text-white shadow-md shadow-purple-200' : 'bg-white text-slate-500 hover:bg-purple-50'}">
+                        <span>${cat}</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[10px] ${isActive ? 'bg-purple-400/50 text-white' : 'bg-slate-100 text-slate-500'}">${count}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        // Weekly Matrix Progress Tracker
+        function renderWeeklyTracker() {
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const container = document.getElementById('weekly-tracker-grid');
+
+            let html = `
+                <div class="grid grid-cols-8 gap-2 items-center text-xs font-bold text-slate-400 border-b pb-2 border-slate-100">
+                    <div>Habit</div>
+                    ${days.map(d => `<div class="text-center">${d}</div>`).join('')}
+                </div>
+            `;
+
+            html += habits.map(h => `
+                <div class="grid grid-cols-8 gap-2 items-center py-2 border-b border-slate-50">
+                    <div class="font-bold text-xs text-slate-700 truncate pr-2" title="${escapeHtml(h.name)}">${escapeHtml(h.name)}</div>
+                    ${h.history.map((done, idx) => `
+                        <div class="flex justify-center">
+                            <div class="w-6 h-6 rounded-lg ${done ? 'bg-emerald-400 text-white' : 'bg-slate-100 text-slate-300'} flex items-center justify-center text-[10px] font-extrabold">
+                                ${done ? '✓' : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        // Interactive Actions
+        function toggleHabit(id) {
+            habits = habits.map(h => {
+                if (h.id === id) {
+                    const nextCompleted = !h.completed;
+                    const nextStreak = nextCompleted ? h.streak + 1 : Math.max(0, h.streak - 1);
+                    const updatedHistory = [...h.history];
+                    updatedHistory[6] = nextCompleted; // Today is last element
+                    
+                    if (nextCompleted) {
+                        showToast(`Bloom! "${h.name}" completed! 🌸`, 'success');
+                    }
+                    return { ...h, completed: nextCompleted, streak: nextStreak, history: updatedHistory };
+                }
+                return h;
+            });
+            saveState();
+            renderAll();
+        }
+
+        function setCategory(cat) {
+            activeCategory = cat;
+            renderCategoryFilters();
+            renderHabitCards();
+            lucide.createIcons();
+        }
+
+        function deleteHabit(id) {
+            const h = habits.find(item => item.id === id);
+            habits = habits.filter(item => item.id !== id);
+            saveState();
+            renderAll();
+            showToast(`Deleted "${h ? h.name : 'habit'}"`, 'info');
+        }
+
+        // Navigation Tabs Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            // Header Title Update
+            const titles = {
+                dashboard: 'Dashboard',
+                habits: 'My Habits',
+                progress: 'Weekly Progress',
+                settings: 'Settings'
+            };
+            document.getElementById('page-title').innerText = titles[tabId];
+
+            // Sidebar highlight
+            document.querySelectorAll('#sidebar-nav .nav-btn').forEach(btn => {
+                if (btn.getAttribute('data-tab') === tabId) {
+                    btn.className = 'nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 bg-purple-100/70 text-purple-700 shadow-sm';
+                } else {
+                    btn.className = 'nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-sm font-medium text-slate-500 hover:text-purple-600 hover:bg-purple-50/50 transition-all duration-200';
+                }
+            });
+
+            // Mobile highlight
+            document.querySelectorAll('[data-tab-mobile]').forEach(btn => {
+                if (btn.getAttribute('data-tab-mobile') === tabId) {
+                    btn.className = 'flex flex-col items-center text-purple-600';
+                } else {
+                    btn.className = 'flex flex-col items-center text-slate-400';
+                }
+            });
+        }
+
+        // Modal Controls
+        function openModal() {
+            const modal = document.getElementById('habit-modal');
+            const card = document.getElementById('modal-card');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                card.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('habit-modal');
+            const card = document.getElementById('modal-card');
+            modal.classList.add('opacity-0');
+            card.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        function handleAddHabit(e) {
+            e.preventDefault();
+            const name = document.getElementById('habit-name').value.trim();
+            const category = document.getElementById('habit-category').value;
+            const icon = document.getElementById('habit-icon').value;
+
+            if (!name) return;
+
+            const newHabit = {
+                id: Date.now().toString(),
+                name: name,
+                category: category,
+                icon: icon,
+                completed: false,
+                streak: 0,
+                history: [false, false, false, false, false, false, false]
+            };
+
+            habits.push(newHabit);
+            saveState();
+            renderAll();
+            closeModal();
+            document.getElementById('add-habit-form').reset();
+            showToast(`Added new habit "${name}"`, 'success');
+        }
+
+        // Settings Actions
+        function resetToDefaults() {
+            habits = defaultHabits;
+            saveState();
+            renderAll();
+            showToast('Reset habits to initial dummy data', 'info');
+        }
+
+        function clearAllData() {
+            habits = [];
+            saveState();
+            renderAll();
+            showToast('Cleared all habits', 'info');
+        }
+
+        function setTheme(themeClass) {
+            document.body.className = `${themeClass} text-slate-700 antialiased selection:bg-purple-200`;
+            showToast('Palette updated', 'info');
+        }
+
+        // Toast Helper
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgColor = type === 'success' ? 'bg-slate-900 text-white' : 'bg-white text-slate-800 border border-purple-100';
+            toast.className = `pointer-events-auto flex items-center space-x-2 px-4 py-3 rounded-2xl shadow-xl text-xs font-bold transition-all duration-300 transform translate-y-2 opacity-0 ${bgColor}`;
+            
+            toast.innerHTML = `
+                <i data-lucide="${type === 'success' ? 'sparkles' : 'info'}" class="w-4 h-4 ${type === 'success' ? 'text-amber-300' : 'text-purple-500'}"></i>
+                <span>${msg}</span>
+            `;
+
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 2600);
+        }
+
+        // Helper: Escape HTML
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
